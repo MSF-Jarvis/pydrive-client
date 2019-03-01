@@ -15,7 +15,7 @@ def upload(filename: str) -> None:
     if not os.path.exists(filename):
         print("Specified filename {} does not exist!".format(filename))
         return
-    file_to_upload = drive.CreateFile()
+    file_to_upload = drive.CreateFile({'title': filename.split('/')[-1]})
     file_to_upload.SetContentFile(filename)
     file_to_upload.Upload(param={"http": http})
     file_to_upload.FetchMetadata()
