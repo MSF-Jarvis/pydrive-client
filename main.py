@@ -11,11 +11,14 @@ drive: GoogleDrive
 http = None
 
 
-def upload(filename: str) -> None:
+def upload(filename: str, parent_folder: str = None) -> None:
     if not os.path.exists(filename):
         print("Specified filename {} does not exist!".format(filename))
         return
-    file_to_upload = drive.CreateFile({'title': filename.split('/')[-1]})
+    file_params = {'title': filename.split('/')[-1]}
+    if parent_folder:
+        file_params['parents'] = [{"kind": "drive#fileLink", "id": parent_folder}]
+    file_to_upload = drive.CreateFile(file_params)
     file_to_upload.SetContentFile(filename)
     file_to_upload.Upload(param={"http": http})
     file_to_upload.FetchMetadata()
@@ -57,11 +60,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--list-files", help="List the files in your drive", action="store_true")
     parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive", type=str)
+    parser.add_argument("-p", "--parent-folder", help="Only for use with with -u/--upload-file, sets parent folder "
+                                                      "for uploaded file.", type=str)
     args = parser.parse_args()
     if args.list_files:
         list_files()
     elif args.upload_file:
-        upload(args.upload_file)
+        upload(args.upload_file, args.parent_folder)
     else:
         print("No valid options provided!")
 
