@@ -20,6 +20,7 @@ def upload(filename: str) -> None:
     file_to_upload.Upload(param={"http": http})
     file_to_upload.FetchMetadata()
     print("Get it with: {}".format(file_to_upload['id']))
+    print("URL: {}".format(file_to_upload['alternateLink']))
 
 
 def main() -> None:
