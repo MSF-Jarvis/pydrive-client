@@ -28,6 +28,14 @@ def upload(filename: str) -> None:
     print("URL: {}".format(file_to_upload['webContentLink']))
 
 
+def list_files() -> None:
+    file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+    for file in file_list:
+        if file['mimeType'] == 'application/vnd.google-apps.folder':
+            continue
+        print('Title: {}\tid: {}'.format(file['title'], file['id']))
+
+
 def main() -> None:
     global drive, http
     gauth: GoogleAuth = GoogleAuth()
@@ -47,9 +55,12 @@ def main() -> None:
     drive = GoogleDrive(gauth)
     http = drive.auth.Get_Http_Object()
     parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--list-files", help="List the files in your drive")
     parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive", type=str)
     args = parser.parse_args()
-    if args.upload_file:
+    if args.list_files:
+        list_files()
+    elif args.upload_file:
         upload(args.upload_file)
     else:
         print("No valid options provided!")
