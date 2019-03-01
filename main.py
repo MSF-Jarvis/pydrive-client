@@ -25,7 +25,7 @@ def upload(filename: str) -> None:
         'role': 'reader'
     })
     print("Get it with: {}".format(file_to_upload['id']))
-    print("URL: {}".format(file_to_upload['alternateLink']))
+    print("URL: {}".format(file_to_upload['selfLink']))
 
 
 def main() -> None:
