@@ -19,6 +19,11 @@ def upload(filename: str) -> None:
     file_to_upload.SetContentFile(filename)
     file_to_upload.Upload(param={"http": http})
     file_to_upload.FetchMetadata()
+    file_to_upload.InsertPermission({
+        'type': 'anyone',
+        'value': 'anyone',
+        'role': 'reader'
+    })
     print("Get it with: {}".format(file_to_upload['id']))
     print("URL: {}".format(file_to_upload['alternateLink']))
 
