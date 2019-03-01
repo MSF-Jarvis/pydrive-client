@@ -39,6 +39,14 @@ def list_files() -> None:
         print('Title: {}\tid: {}'.format(file['title'], file['id']))
 
 
+def download_file(id: str) -> None:
+    file = drive.CreateFile({'id': id})
+    file.FetchMetadata()
+    filename = file['title']
+    file.GetContentFile(filename)
+    print("Downloaded {}!".format(filename))
+
+
 def main() -> None:
     global drive, http
     gauth: GoogleAuth = GoogleAuth()
@@ -62,11 +70,14 @@ def main() -> None:
     parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive", type=str)
     parser.add_argument("-p", "--parent-folder", help="Only for use with with -u/--upload-file, sets parent folder "
                                                       "for uploaded file.", type=str)
+    parser.add_argument("-d", "--download-file", help="Download the requested file", type=str)
     args = parser.parse_args()
     if args.list_files:
         list_files()
     elif args.upload_file:
         upload(args.upload_file, args.parent_folder)
+    elif args.download_file:
+        download_file(args.download_file)
     else:
         print("No valid options provided!")
 
