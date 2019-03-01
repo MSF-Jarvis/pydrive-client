@@ -55,7 +55,7 @@ def main() -> None:
     drive = GoogleDrive(gauth)
     http = drive.auth.Get_Http_Object()
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--list-files", help="List the files in your drive")
+    parser.add_argument("-l", "--list-files", help="List the files in your drive", action="store_true")
     parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive", type=str)
     args = parser.parse_args()
     if args.list_files:
