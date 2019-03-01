@@ -7,6 +7,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
 
+# pylint: disable=invalid-name
 drive: GoogleDrive
 http = None
 
@@ -39,8 +40,8 @@ def list_files() -> None:
         print('Title: {}\tid: {}'.format(file['title'], file['id']))
 
 
-def download_file(id: str) -> None:
-    file = drive.CreateFile({'id': id})
+def download_file(file_id: str) -> None:
+    file = drive.CreateFile({'id': file_id})
     file.FetchMetadata()
     filename = file['title']
     file.GetContentFile(filename)
@@ -66,10 +67,13 @@ def main() -> None:
     drive = GoogleDrive(gauth)
     http = drive.auth.Get_Http_Object()
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--list-files", help="List the files in your drive", action="store_true")
-    parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive", type=str)
-    parser.add_argument("-p", "--parent-folder", help="Only for use with with -u/--upload-file, sets parent folder "
-                                                      "for uploaded file.", type=str)
+    parser.add_argument("-l", "--list-files", help="List the files in your drive",
+                        action="store_true")
+    parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive",
+                        type=str)
+    parser.add_argument("-p", "--parent-folder", help="Only for use with with -u/--upload-file, "
+                                                      "sets parent folder for uploaded file.",
+                        type=str)
     parser.add_argument("-d", "--download-file", help="Download the requested file", type=str)
     args = parser.parse_args()
     if args.list_files:
