@@ -6,6 +6,7 @@ import os
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+from create_helpers import get_file
 
 # pylint: disable=invalid-name
 drive: GoogleDrive
@@ -16,11 +17,10 @@ def upload(filename: str, parent_folder: str = None) -> None:
     if not os.path.exists(filename):
         print("Specified filename {} does not exist!".format(filename))
         return
-    file_params = {'title': filename.split('/')[-1]}
+    file_params = {}
     if parent_folder:
         file_params['parents'] = [{"kind": "drive#fileLink", "id": parent_folder}]
-    file_to_upload = drive.CreateFile(file_params)
-    file_to_upload.SetContentFile(filename)
+    file_to_upload = get_file(drive, filename, file_params)
     file_to_upload.Upload(param={"http": http})
     file_to_upload.FetchMetadata()
     file_to_upload.InsertPermission({
