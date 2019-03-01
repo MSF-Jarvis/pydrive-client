@@ -55,6 +55,10 @@ def main() -> None:
     gauth.LoadCredentialsFile("mycreds.txt")
     if gauth.credentials is None:
         # Authenticate if they're not there
+        if not os.path.isfile("client_secrets.json"):
+            print("client_secrets.json does not exist!\nPlease create and get the keys from"
+                  " https://console.developers.google.com")
+            return
         gauth.CommandLineAuth()
     elif gauth.access_token_expired:
         # Refresh them if expired
