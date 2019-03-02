@@ -15,7 +15,7 @@ http = None
 
 def upload(filename: str, parent_folder: str = None) -> None:
     if not os.path.exists(filename):
-        print("Specified filename {} does not exist!".format(filename))
+        print(f"Specified filename {filename} does not exist!")
         return
     file_params = {'title': filename.split('/')[-1]}
     if parent_folder:
@@ -29,8 +29,8 @@ def upload(filename: str, parent_folder: str = None) -> None:
         'value': 'anyone',
         'role': 'reader'
     })
-    print("Get it with: {}".format(file_to_upload['id']))
-    print("URL: {}".format(file_to_upload['webContentLink']))
+    print(f"Get it with: {file_to_upload['id']}")
+    print(f"URL: {file_to_upload['webContentLink']}")
 
 
 def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
@@ -39,7 +39,7 @@ def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
         if file['mimeType'] == FOLDER_MIME_TYPE:
             continue
         if not skip_print:
-            print('Title: {}\tid: {}'.format(file['title'], file['id']))
+            print(f"Title: {file['title']}\tid: {file['id']}")
     return file_list
 
 
@@ -55,9 +55,9 @@ def download_file(file_id: str) -> None:
         files_to_dl.append(file)
     for dl_file in files_to_dl:
         filename = dl_file['title']
-        print("Downloading {0} -> {0}".format(filename))
+        print(f"Downloading {filename} -> {filename}")
         dl_file.GetContentFile(filename)
-        print("Downloaded {}!".format(filename))
+        print(f"Downloaded {filename}!")
 
 
 def main() -> None:
