@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Wrapper around PyDrive that implements convenience functions that we
+relied on other command line tools for without requiring writing the
+code for this every time we want to use it.
+"""
 import argparse
 import os
 
@@ -14,6 +19,12 @@ http = None
 
 
 def upload(filename: str, parent_folder: str = None) -> None:
+    """
+    Upload a given file to Google Drive, optionally under a specific parent folder
+    :param filename: The path to the file you wish to upload
+    :param parent_folder: Optional parent folder override, defaults to root
+    :return: None
+    """
     if not os.path.exists(filename):
         print(f"Specified filename {filename} does not exist!")
         return
@@ -34,6 +45,12 @@ def upload(filename: str, parent_folder: str = None) -> None:
 
 
 def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
+    """
+    List all files under a specific folder
+    :param parent_folder: Optional folder ID to list files under, defaults to root
+    :param skip_print: Skip printing files and IDs to stdout
+    :return: A list of files under the directory
+    """
     file_list = drive.ListFile({'q': f"'{parent_folder}' in parents and trashed=false"}).GetList()
     for file in file_list:
         if file['mimeType'] == FOLDER_MIME_TYPE:
@@ -44,6 +61,11 @@ def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
 
 
 def download_file(file_id: str) -> None:
+    """
+    Download a give file
+    :param file_id: File ID to download
+    :return: None
+    """
     file = drive.CreateFile({'id': file_id})
     files_to_dl = []
     file.FetchMetadata()
@@ -61,6 +83,10 @@ def download_file(file_id: str) -> None:
 
 
 def main() -> None:
+    """
+    The meat and potatoes of it all, entry point for this module.
+    :return: None
+    """
     global drive, http
     gauth: GoogleAuth = GoogleAuth()
     # Try to load saved client credentials
