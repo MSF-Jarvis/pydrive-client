@@ -44,7 +44,7 @@ def upload(filename: str, parent_folder: str = None) -> None:
     print(f"URL: {file_to_upload['webContentLink']}")
 
 
-def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
+def list_files(parent_folder: str = 'root', skip_print: bool = False, skip_directory: bool = True) -> list:
     """
     List all files under a specific folder
     :param parent_folder: Optional folder ID to list files under, defaults to root
@@ -53,7 +53,7 @@ def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
     """
     file_list = drive.ListFile({'q': f"'{parent_folder}' in parents and trashed=false"}).GetList()
     for file in file_list:
-        if file['mimeType'] == FOLDER_MIME_TYPE:
+        if skip_directory and file['mimeType'] == FOLDER_MIME_TYPE:
             continue
         if not skip_print:
             print(f"Title: {file['title']}\tid: {file['id']}")
@@ -70,13 +70,26 @@ def download_file(file_id: str) -> None:
     files_to_dl = []
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
-        # TODO: Support folders inside folders
         print("{} is a folder, downloading recursively".format(file.metadata['title']))
-        files_to_dl = list_files(file_id, skip_print=True)
+        files_to_dl = list_files(file_id, skip_print=True, skip_directory=False)
     else:
         files_to_dl.append(file)
     for dl_file in files_to_dl:
+        dl_file.FetchMetadata()
+        if dl_file.metadata['mimeType'] == FOLDER_MIME_TYPE:
+            download_file(dl_file.metadata['id'])
+            continue
         filename = dl_file['title']
+        folder = drive.CreateFile({'id': dl_file.metadata['parents'][0]['id']})
+        folder.FetchMetadata()
+        folder_name = folder.metadata['title']
+        while not folder.metadata['parents'][0]['isRoot']:
+            folder = drive.CreateFile({'id': folder.metadata['parents'][0]['id']})
+            folder.FetchMetadata()
+            folder_name = os.path.join(folder.metadata['title'], folder_name)
+        if not os.path.isdir(folder_name):
+            os.makedirs(folder_name)
+        filename = os.path.join(folder_name, filename)
         print(f"Downloading {filename} -> {filename}")
         dl_file.GetContentFile(filename)
         print(f"Downloaded {filename}!")
