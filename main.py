@@ -78,19 +78,16 @@ def download_file(file_id: str) -> None:
     :return: None
     """
     global initial_folder
-    file = drive.CreateFile({'id': file_id})
     files_to_dl, folders_to_dl = [], []
+    file = drive.CreateFile({'id': file_id})
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
         print(f"{file.metadata['title']} is a folder, downloading recursively")
         files_to_dl, folders_to_dl = list_files(file_id)
         if initial_folder is None:
             initial_folder = file
-            parent_folder = drive.CreateFile({'id': initial_folder.metadata['id']})
-            parent_folder.FetchMetadata()
-            parent_folder_title = parent_folder.metadata['title']
-            if not os.path.isdir(parent_folder_title):
-                os.mkdir(parent_folder_title)
+            if not os.path.isdir(file.metadata['title']):
+                os.mkdir(file.metadata['title'])
         else:
             parent_folder = initial_folder
             parent_folder.FetchMetadata()
