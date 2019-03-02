@@ -90,7 +90,7 @@ def main() -> None:
     global drive, http
     gauth: GoogleAuth = GoogleAuth()
     # Try to load saved client credentials
-    gauth.LoadCredentialsFile("mycreds.txt")
+    gauth.LoadCredentialsFile(os.path.dirname(os.path.abspath(__file__)) + "/mycreds.txt")
     if gauth.credentials is None:
         # Authenticate if they're not there
         gauth.CommandLineAuth()
@@ -101,7 +101,7 @@ def main() -> None:
         # Initialize the saved creds
         gauth.Authorize()
     # Save the current credentials to a file
-    gauth.SaveCredentialsFile("mycreds.txt")
+    gauth.SaveCredentialsFile(os.path.dirname(os.path.abspath(__file__)) + "/mycreds.txt")
     drive = GoogleDrive(gauth)
     http = drive.auth.Get_Http_Object()
     parser = argparse.ArgumentParser()
