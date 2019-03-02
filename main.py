@@ -82,7 +82,7 @@ def download_file(file_id: str) -> None:
     files_to_dl, folders_to_dl = [], []
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
-        print("{} is a folder, downloading recursively".format(file.metadata['title']))
+        print(f"{file.metadata['title']} is a folder, downloading recursively")
         files_to_dl, folders_to_dl = list_files(file_id)
         if initial_folder_id is None:
             initial_folder_id = file.metadata['id']
