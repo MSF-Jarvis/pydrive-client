@@ -16,6 +16,7 @@ FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 # pylint: disable=invalid-name
 drive: GoogleDrive
 http = None
+folder_id = None
 
 
 def upload(filename: str, parent_folder: str = None) -> None:
@@ -44,20 +45,31 @@ def upload(filename: str, parent_folder: str = None) -> None:
     print(f"URL: {file_to_upload['webContentLink']}")
 
 
-def list_files(parent_folder: str = 'root', skip_print: bool = False, skip_directory: bool = True) -> list:
+def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
     """
     List all files under a specific folder
     :param parent_folder: Optional folder ID to list files under, defaults to root
     :param skip_print: Skip printing files and IDs to stdout
-    :return: A list of files under the directory
+    :return: A list of files under the directory, a list of directories under the directory
     """
     file_list = drive.ListFile({'q': f"'{parent_folder}' in parents and trashed=false"}).GetList()
     for file in file_list:
-        if skip_directory and file['mimeType'] == FOLDER_MIME_TYPE:
+        if file['mimeType'] == FOLDER_MIME_TYPE:
             continue
         if not skip_print:
             print(f"Title: {file['title']}\tid: {file['id']}")
-    return file_list
+
+    parent_folder = drive.CreateFile({'id': parent_folder})
+    parent_folder.FetchMetadata()
+    title = parent_folder.metadata['title']
+    files_list, folders_list = [], []
+    for file in file_list:
+        file['title'] = os.path.join(title, file['title'])
+        if file['mimeType'] != FOLDER_MIME_TYPE:
+            files_list.append(file)
+        else:
+            folders_list.append(file)
+    return files_list, folders_list
 
 
 def download_file(file_id: str) -> None:
@@ -66,33 +78,40 @@ def download_file(file_id: str) -> None:
     :param file_id: File ID to download
     :return: None
     """
+    global folder_id
     file = drive.CreateFile({'id': file_id})
-    files_to_dl = []
+    files_to_dl, folders_to_dl = [], []
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
         print("{} is a folder, downloading recursively".format(file.metadata['title']))
-        files_to_dl = list_files(file_id, skip_print=True, skip_directory=False)
+        files_to_dl, folders_to_dl = list_files(file_id, skip_print=True)
+        if folder_id is None:
+            folder_id = file.metadata['id']
+            parent_folder = drive.CreateFile({'id': folder_id})
+            parent_folder.FetchMetadata()
+            parent_folder = parent_folder.metadata['title']
+            if not os.path.isdir(parent_folder):
+                os.mkdir(parent_folder)
+        else:
+            parent_folder = drive.CreateFile({'id': folder_id})
+            parent_folder.FetchMetadata()
+            for file in files_to_dl:
+                file['title'] = os.path.join(parent_folder.metadata['title'], file['title'])
+
     else:
         files_to_dl.append(file)
     for dl_file in files_to_dl:
-        dl_file.FetchMetadata()
-        if dl_file.metadata['mimeType'] == FOLDER_MIME_TYPE:
-            download_file(dl_file.metadata['id'])
-            continue
         filename = dl_file['title']
-        folder = drive.CreateFile({'id': dl_file.metadata['parents'][0]['id']})
-        folder.FetchMetadata()
-        folder_name = folder.metadata['title']
-        while not folder.metadata['parents'][0]['isRoot']:
-            folder = drive.CreateFile({'id': folder.metadata['parents'][0]['id']})
-            folder.FetchMetadata()
-            folder_name = os.path.join(folder.metadata['title'], folder_name)
-        if not os.path.isdir(folder_name):
-            os.makedirs(folder_name)
-        filename = os.path.join(folder_name, filename)
         print(f"Downloading {filename} -> {filename}")
         dl_file.GetContentFile(filename)
         print(f"Downloaded {filename}!")
+
+    for folder in folders_to_dl:
+        folder_name = folder['title']
+        if not os.path.isdir(folder_name):
+            os.makedirs(folder_name)
+        download_file(folder['id'])
+
 
 
 def main() -> None:
