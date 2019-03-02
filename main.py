@@ -80,7 +80,7 @@ def main() -> None:
     http = drive.auth.Get_Http_Object()
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--list-files", help="List the files in your drive",
-                        action="store_true")
+                        type=str, const="root", nargs='?', action="store")
     parser.add_argument("-u", "--upload-file", help="Pass a file to be uploaded to GDrive",
                         type=str)
     parser.add_argument("-p", "--parent-folder", help="Only for use with with -u/--upload-file, "
@@ -89,7 +89,7 @@ def main() -> None:
     parser.add_argument("-d", "--download-file", help="Download the requested file", type=str)
     args = parser.parse_args()
     if args.list_files:
-        list_files()
+        list_files(parent_folder=args.list_files)
     elif args.upload_file:
         upload(args.upload_file, args.parent_folder)
     elif args.download_file:
