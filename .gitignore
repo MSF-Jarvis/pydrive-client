@@ -5,3 +5,4 @@ __pycache__
 log.log
 client_secrets.json
 mycreds.txt
+settings.yaml
