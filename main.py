@@ -7,6 +7,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
 
+FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 # pylint: disable=invalid-name
 drive: GoogleDrive
 http = None
@@ -32,20 +33,31 @@ def upload(filename: str, parent_folder: str = None) -> None:
     print("URL: {}".format(file_to_upload['webContentLink']))
 
 
-def list_files() -> None:
-    file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
+    file_list = drive.ListFile({'q': f"'{parent_folder}' in parents and trashed=false"}).GetList()
     for file in file_list:
-        if file['mimeType'] == 'application/vnd.google-apps.folder':
+        if file['mimeType'] == FOLDER_MIME_TYPE:
             continue
-        print('Title: {}\tid: {}'.format(file['title'], file['id']))
+        if not skip_print:
+            print('Title: {}\tid: {}'.format(file['title'], file['id']))
+    return file_list
 
 
 def download_file(file_id: str) -> None:
     file = drive.CreateFile({'id': file_id})
+    files_to_dl = []
     file.FetchMetadata()
-    filename = file['title']
-    file.GetContentFile(filename)
-    print("Downloaded {}!".format(filename))
+    if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
+        # TODO: Support folders inside folders
+        print("{} is a folder, downloading recursively".format(file.metadata['title']))
+        files_to_dl = list_files(file_id, skip_print=True)
+    else:
+        files_to_dl.append(file)
+    for dl_file in files_to_dl:
+        filename = dl_file['title']
+        print("Downloading {0} -> {0}".format(filename))
+        dl_file.GetContentFile(filename)
+        print("Downloaded {}!".format(filename))
 
 
 def main() -> None:
