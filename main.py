@@ -15,7 +15,7 @@ FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 # pylint: disable=invalid-name
 drive: GoogleDrive
 http = None
-initial_folder_id = None
+initial_folder = None
 
 
 def upload(filename: str, parent_folder: str = None) -> None:
@@ -77,22 +77,22 @@ def download_file(file_id: str) -> None:
     :param file_id: File ID to download
     :return: None
     """
-    global initial_folder_id
+    global initial_folder
     file = drive.CreateFile({'id': file_id})
     files_to_dl, folders_to_dl = [], []
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
         print(f"{file.metadata['title']} is a folder, downloading recursively")
         files_to_dl, folders_to_dl = list_files(file_id)
-        if initial_folder_id is None:
-            initial_folder_id = file.metadata['id']
-            parent_folder = drive.CreateFile({'id': initial_folder_id})
+        if initial_folder is None:
+            initial_folder = file
+            parent_folder = drive.CreateFile({'id': initial_folder.metadata['id']})
             parent_folder.FetchMetadata()
             parent_folder_title = parent_folder.metadata['title']
             if not os.path.isdir(parent_folder_title):
                 os.mkdir(parent_folder_title)
         else:
-            parent_folder = drive.CreateFile({'id': initial_folder_id})
+            parent_folder = initial_folder
             parent_folder.FetchMetadata()
             for file in files_to_dl:
                 file['title'] = os.path.join(parent_folder.metadata['title'], file['title'])
