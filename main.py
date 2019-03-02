@@ -44,18 +44,18 @@ def upload(filename: str, parent_folder: str = None) -> None:
     print(f"URL: {file_to_upload['webContentLink']}")
 
 
-def list_files(parent_folder: str = 'root', skip_print: bool = False) -> (list, list):
+def list_files(parent_folder: str = 'root', print_to_stdout: bool = False) -> (list, list):
     """
     List all files under a specific folder
     :param parent_folder: Optional folder ID to list files under, defaults to root
-    :param skip_print: Skip printing files and IDs to stdout
+    :param print_to_stdout: While aggregating the list of files, also print to stdout
     :return: A list of files under the directory, a list of directories under the directory
     """
     file_list = drive.ListFile({'q': f"'{parent_folder}' in parents and trashed=false"}).GetList()
     for file in file_list:
         if file['mimeType'] == FOLDER_MIME_TYPE:
             continue
-        if not skip_print:
+        if print_to_stdout:
             print(f"Title: {file['title']}\tid: {file['id']}")
 
     parent_folder = drive.CreateFile({'id': parent_folder})
@@ -83,7 +83,7 @@ def download_file(file_id: str) -> None:
     file.FetchMetadata()
     if file.metadata["mimeType"] == FOLDER_MIME_TYPE:
         print("{} is a folder, downloading recursively".format(file.metadata['title']))
-        files_to_dl, folders_to_dl = list_files(file_id, skip_print=True)
+        files_to_dl, folders_to_dl = list_files(file_id)
         if initial_folder_id is None:
             initial_folder_id = file.metadata['id']
             parent_folder = drive.CreateFile({'id': initial_folder_id})
@@ -145,7 +145,7 @@ def main() -> None:
     parser.add_argument("-d", "--download-file", help="Download the requested file", type=str)
     args = parser.parse_args()
     if args.list_files:
-        list_files(parent_folder=args.list_files)
+        list_files(args.list_files, True)
     elif args.upload_file:
         upload(args.upload_file, args.parent_folder)
     elif args.download_file:
