@@ -11,7 +11,6 @@ import os
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-
 FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 # pylint: disable=invalid-name
 drive: GoogleDrive
@@ -45,7 +44,7 @@ def upload(filename: str, parent_folder: str = None) -> None:
     print(f"URL: {file_to_upload['webContentLink']}")
 
 
-def list_files(parent_folder: str = 'root', skip_print: bool = False) -> list:
+def list_files(parent_folder: str = 'root', skip_print: bool = False) -> (list, list):
     """
     List all files under a specific folder
     :param parent_folder: Optional folder ID to list files under, defaults to root
@@ -111,7 +110,6 @@ def download_file(file_id: str) -> None:
         if not os.path.isdir(folder_name):
             os.makedirs(folder_name)
         download_file(folder['id'])
-
 
 
 def main() -> None:
