@@ -134,7 +134,7 @@ class DriveApiClient:
             folder_id = folder.metadata['id']
             if not os.path.isdir(folder_name):
                 os.makedirs(folder_name)
-                self.download_file(folder_id)
+            self.download_file(folder_id)
 
 
 def main() -> None:
