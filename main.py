@@ -84,6 +84,16 @@ class DriveApiClient:
         parent_folder = self.drive.CreateFile({'id': parent_folder})
         parent_folder.FetchMetadata()
         title = parent_folder.metadata['title']
+        try:
+            if self.initial_folder != None:
+                while parent_folder.metadata['id'] != self.initial_folder.metadata['id']:
+                    parent_folder = parent_folder.metadata['parents'][0]['id']
+                    parent_folder = self.drive.CreateFile({'id': parent_folder})
+                    parent_folder.FetchMetadata()
+                    if title.split('/')[0] != parent_folder.metadata['title']:
+                        title = os.path.join(parent_folder.metadata['title'], title)
+        except IndexError:
+            title = os.path.join(self.initial_folder.metadata['title'], title)
         files_list, folders_list = [], []
         for file in file_list:
             file['title'] = os.path.join(title, file['title'])
@@ -109,12 +119,6 @@ class DriveApiClient:
                 self.initial_folder = file
                 if not os.path.isdir(file.metadata['title']):
                     os.mkdir(file.metadata['title'])
-            else:
-                parent_folder = self.initial_folder
-                parent_folder.FetchMetadata()
-                for file in files_to_dl:
-                    file['title'] = os.path.join(parent_folder.metadata['title'], file['title'])
-
         else:
             files_to_dl.append(file)
         for dl_file in files_to_dl:
@@ -125,9 +129,19 @@ class DriveApiClient:
 
         for folder in folders_to_dl:
             folder_name = folder['title']
+            folder_id = folder.metadata['id']
+            if folder_name.split('/')[0] != self.initial_folder.metadata['title']:
+                while folder.metadata['id'] != self.initial_folder.metadata['id']:
+                    parent = folder.metadata['parents'][0]['id']
+                    parent = self.drive.CreateFile({'id': parent})
+                    parent.FetchMetadata()
+                    if folder_name.split('/')[0] != parent['title']:
+                        folder_name = os.path.join(parent['title'], folder_name)
+                    folder = parent
+                    folder.FetchMetadata()
             if not os.path.isdir(folder_name):
                 os.makedirs(folder_name)
-                self.download_file(folder['id'])
+                self.download_file(folder_id)
 
 
 def main() -> None:
