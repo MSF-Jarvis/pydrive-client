@@ -122,6 +122,9 @@ class DriveApiClient:
             files_to_dl.append(file)
         for dl_file in files_to_dl:
             filename = dl_file['title']
+            if os.path.isfile(filename):
+                print(f'{filename} already exists, skipping.')
+                continue
             print(f"Downloading {filename} -> {filename}")
             dl_file.GetContentFile(filename)
             print(f"Downloaded {filename}!")
