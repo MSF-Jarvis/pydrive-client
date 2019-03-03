@@ -90,8 +90,7 @@ class DriveApiClient:
                     parent_folder = parent_folder.metadata['parents'][0]['id']
                     parent_folder = self.drive.CreateFile({'id': parent_folder})
                     parent_folder.FetchMetadata()
-                    if title.split('/')[0] != parent_folder.metadata['title']:
-                        title = os.path.join(parent_folder.metadata['title'], title)
+                    title = os.path.join(parent_folder.metadata['title'], title)
         except IndexError:
             title = os.path.join(self.initial_folder.metadata['title'], title)
         files_list, folders_list = [], []
@@ -135,8 +134,7 @@ class DriveApiClient:
                     parent = folder.metadata['parents'][0]['id']
                     parent = self.drive.CreateFile({'id': parent})
                     parent.FetchMetadata()
-                    if folder_name.split('/')[0] != parent['title']:
-                        folder_name = os.path.join(parent['title'], folder_name)
+                    folder_name = os.path.join(parent['title'], folder_name)
                     folder = parent
                     folder.FetchMetadata()
             if not os.path.isdir(folder_name):
