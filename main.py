@@ -129,14 +129,6 @@ class DriveApiClient:
         for folder in folders_to_dl:
             folder_name = folder['title']
             folder_id = folder.metadata['id']
-            if folder_name.split('/')[0] != self.initial_folder.metadata['title']:
-                while folder.metadata['id'] != self.initial_folder.metadata['id']:
-                    parent = folder.metadata['parents'][0]['id']
-                    parent = self.drive.CreateFile({'id': parent})
-                    parent.FetchMetadata()
-                    folder_name = os.path.join(parent['title'], folder_name)
-                    folder = parent
-                    folder.FetchMetadata()
             if not os.path.isdir(folder_name):
                 os.makedirs(folder_name)
                 self.download_file(folder_id)
