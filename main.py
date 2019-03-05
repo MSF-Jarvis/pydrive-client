@@ -85,7 +85,7 @@ class DriveApiClient:
         parent_folder.FetchMetadata()
         title = parent_folder.metadata['title']
         try:
-            if self.initial_folder != None:
+            if self.initial_folder is not None:
                 while parent_folder.metadata['id'] != self.initial_folder.metadata['id']:
                     parent_folder = parent_folder.metadata['parents'][0]['id']
                     parent_folder = self.drive.CreateFile({'id': parent_folder})
