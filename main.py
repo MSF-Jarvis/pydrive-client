@@ -102,9 +102,11 @@ class DriveApiClient:
                 folders_list.append(file)
         return files_list, folders_list
 
-    def download_file(self, file_id: str) -> None:
+    def download_file(self, file_id: str, skip_existing: bool = False, overwrite_existing: bool = False) -> None:
         """
         Download a give file
+        :param overwrite_existing: Overwrite a file if it already exists
+        :param skip_existing: Skip downloading the file if it already exists
         :param file_id: File ID to download
         :return: None
         """
@@ -123,8 +125,15 @@ class DriveApiClient:
         for dl_file in files_to_dl:
             filename = dl_file['title']
             if os.path.isfile(filename):
-                print(f'{filename} already exists, skipping.')
-                continue
+                if skip_existing:
+                    print(f'{filename} already exists, skipping.')
+                    continue
+                elif overwrite_existing:
+                    print(f'{filename} already exists, overwriting.')
+                    os.remove(filename)
+                else:
+                    raise IllegalStateException(f'{filename} already exists but neither --skip nor --overwrite were '
+                                                f'passed!')
             print(f"Downloading {filename} -> {filename}")
             dl_file.GetContentFile(filename)
             print(f"Downloaded {filename}!")
@@ -135,6 +144,10 @@ class DriveApiClient:
             if not os.path.isdir(folder_name):
                 os.makedirs(folder_name)
             self.download_file(folder_id)
+
+
+class IllegalStateException(Exception):
+    pass
 
 
 def main() -> None:
@@ -152,13 +165,20 @@ def main() -> None:
                                                       "sets parent folder for uploaded file.",
                         type=str)
     parser.add_argument("-d", "--download-file", help="Download the requested file", type=str)
+    file_behaviour_group = parser.add_mutually_exclusive_group()
+    file_behaviour_group.add_argument("-s", "--skip", help="Skip existing files while downloading", action="store_true")
+    file_behaviour_group.add_argument("-f", "--force", help="Re-download existing files", action="store_true")
     args = parser.parse_args()
     if args.list_files:
         client.list_files(args.list_files, True)
     elif args.upload_file:
         client.upload(args.upload_file, args.parent_folder)
     elif args.download_file:
-        client.download_file(args.download_file)
+        try:
+            client.download_file(args.download_file, skip_existing=args.skip, overwrite_existing=args.force)
+        except IllegalStateException as e:
+            print(f"{e.__class__.__name__}: {e.args[0]}")
+            exit(1)
     else:
         print("No valid options provided!")
 
