@@ -7,6 +7,7 @@ code for this every time we want to use it.
 """
 import argparse
 import os
+import os.path as path
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -25,7 +26,7 @@ class DriveApiClient:
     def __init__(self):
         gauth: GoogleAuth = GoogleAuth()
         # Try to load saved client credentials
-        gauth.LoadCredentialsFile(os.path.dirname(os.path.abspath(__file__)) + "/mycreds.txt")
+        gauth.LoadCredentialsFile(path.join(path.dirname(path.abspath(__file__)), "mycreds.txt"))
         if gauth.credentials is None:
             # Authenticate if they're not there
             gauth.CommandLineAuth()
@@ -36,7 +37,7 @@ class DriveApiClient:
             # Initialize the saved creds
             gauth.Authorize()
         # Save the current credentials to a file
-        gauth.SaveCredentialsFile(os.path.dirname(os.path.abspath(__file__)) + "/mycreds.txt")
+        gauth.SaveCredentialsFile(path.join(path.dirname(path.abspath(__file__)), "mycreds.txt"))
         self.drive = GoogleDrive(gauth)
         self.http = self.drive.auth.Get_Http_Object()
 
@@ -47,7 +48,7 @@ class DriveApiClient:
         :param parent_folder: Optional parent folder override, defaults to root
         :return: None
         """
-        if not os.path.exists(filename):
+        if not path.exists(filename):
             print(f"Specified filename {filename} does not exist!")
             return
         file_params = {'title': filename.split('/')[-1]}
@@ -90,12 +91,12 @@ class DriveApiClient:
                     parent_folder = parent_folder.metadata['parents'][0]['id']
                     parent_folder = self.drive.CreateFile({'id': parent_folder})
                     parent_folder.FetchMetadata()
-                    title = os.path.join(parent_folder.metadata['title'], title)
+                    title = path.join(parent_folder.metadata['title'], title)
         except IndexError:
-            title = os.path.join(self.initial_folder.metadata['title'], title)
+            title = path.join(self.initial_folder.metadata['title'], title)
         files_list, folders_list = [], []
         for file in file_list:
-            file['title'] = os.path.join(title, file['title'])
+            file['title'] = path.join(title, file['title'])
             if file['mimeType'] != FOLDER_MIME_TYPE:
                 files_list.append(file)
             else:
@@ -118,13 +119,13 @@ class DriveApiClient:
             files_to_dl, folders_to_dl = self.list_files(file_id)
             if self.initial_folder is None:
                 self.initial_folder = file
-                if not os.path.isdir(file.metadata['title']):
+                if not path.isdir(file.metadata['title']):
                     os.mkdir(file.metadata['title'])
         else:
             files_to_dl.append(file)
         for dl_file in files_to_dl:
             filename = dl_file['title']
-            if os.path.isfile(filename):
+            if path.isfile(filename):
                 if skip_existing:
                     print(f'{filename} already exists, skipping.')
                     continue
@@ -141,7 +142,7 @@ class DriveApiClient:
         for folder in folders_to_dl:
             folder_name = folder['title']
             folder_id = folder.metadata['id']
-            if not os.path.isdir(folder_name):
+            if not path.isdir(folder_name):
                 os.makedirs(folder_name)
             self.download_file(folder_id)
 
