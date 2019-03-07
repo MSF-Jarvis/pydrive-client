@@ -156,7 +156,6 @@ def main() -> None:
     The meat and potatoes of it all, entry point for this module.
     :return: None
     """
-    client = DriveApiClient()
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--list-files", help="List the files in your drive",
                         type=str, const="root", nargs='?', action="store")
@@ -170,6 +169,7 @@ def main() -> None:
     file_behaviour_group.add_argument("-s", "--skip", help="Skip existing files while downloading", action="store_true")
     file_behaviour_group.add_argument("-f", "--force", help="Re-download existing files", action="store_true")
     args = parser.parse_args()
+    client = DriveApiClient()
     if args.list_files:
         client.list_files(args.list_files, True)
     elif args.upload_file:
