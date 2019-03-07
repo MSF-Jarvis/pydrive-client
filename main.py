@@ -8,6 +8,7 @@ code for this every time we want to use it.
 import argparse
 import os
 import os.path as path
+import re
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -151,6 +152,17 @@ class IllegalStateException(Exception):
     pass
 
 
+def url_to_gdrive_id(url: str) -> str:
+    """
+    Parses the given Google Drive URL and extracts the file ID from it
+    to be used by the Drive API client to download it.
+    :param url: The Google Drive URL to parse, can also be an actual ID in case the user feels gracious.
+    :return: file ID extracted from the URL
+    """
+    pattern = re.compile(r"[a-zA-Z0-9-_]{33}")
+    return pattern.search(url).group(0)
+
+
 def main() -> None:
     """
     The meat and potatoes of it all, entry point for this module.
@@ -176,7 +188,7 @@ def main() -> None:
         client.upload(args.upload_file, args.parent_folder)
     elif args.download_file:
         try:
-            client.download_file(args.download_file, skip_existing=args.skip, overwrite_existing=args.force)
+            client.download_file(url_to_gdrive_id(args.download_file), args.skip, args.force)
         except IllegalStateException as e:
             print(f"{e.__class__.__name__}: {e.args[0]}")
             exit(1)
