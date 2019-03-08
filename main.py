@@ -190,7 +190,7 @@ def main() -> None:
         try:
             client.download_file(url_to_gdrive_id(args.download_file), args.skip, args.force)
         except IllegalStateException as e:
-            print(f"{e.__class__.__name__}: {e.args[0]}")
+            print(f"{e.args[0]}")
             exit(1)
     else:
         print("No valid options provided!")
