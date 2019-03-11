@@ -61,7 +61,6 @@ class DriveApiClient:
         file_to_upload.FetchMetadata()
         file_to_upload.InsertPermission({
             'type': 'anyone',
-            'value': 'anyone',
             'role': 'reader'
         })
         print(f"Get it with: {file_to_upload['id']}")
