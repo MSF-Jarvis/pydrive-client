@@ -1,4 +1,5 @@
-# pydrive-client
+# pydrive-client [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+
 Basic client for Google Drive uploads and downloads, built with [PyDrive](https://github.com/gsuitedevs/PyDrive)
 
 
