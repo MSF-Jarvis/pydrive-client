@@ -13,4 +13,4 @@ def pretty_print(obj: dict) -> None:
     :param obj: A dict object to pretty-print
     :return: None
     """
-    print(json.dumps(obj, indent=4, sort_keys=True, separators=(',', ': ')))
+    print(json.dumps(obj, indent=4, sort_keys=True, separators=(",", ": ")))
